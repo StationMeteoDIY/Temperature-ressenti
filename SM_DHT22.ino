@@ -180,27 +180,30 @@ void getDataDHT() {
   float hum   = dht.readHumidity();                         // Lecture de l'humidité
   float temp  = dht.readTemperature();                      // Lecture de la temperature en degrés Celsius (par défaut)
 
-  // Si on a des données, on envoi à Domoticz 
+  // On vérifie que l'on a bien reçu des données des capteurs
   if (isnan(hum) || isnan(temp)) {
-    // On établi le degré de confort
-    int hum_status = 0;
-    if ((hum >= 45) and (hum <= 70))      { hum_status = 1; } // confortable
-    else if ((hum >= 30) and (hum < 45))  { hum_status = 0; } // Normal
-    else if (hum < 30)                    { hum_status = 2; } // sec
-    else if (hum > 70)                    { hum_status = 3; } // humide
-                  
-    if ( idxDHT22 != 0) {
-      String svalue =  String(temp,1) + ";" + String(hum,0) + ";" + String(hum_status);
-      Serial.print("DHT22 : svalue = "); Serial.print(svalue); Serial.print(" (TEMP;HUM;HUM_STAT)");
-      SendData("udevice", idxDHT22, 0, svalue);
-    }
-      
-    if ( idxTempRessenti != 0) {
-      String svalue2 = String(dht.computeHeatIndex(temp, hum, false),1);   // Calcul de l'indice de chaleur en Celsius - Température ressenti (isFahreheit = false)
-      Serial.print("DHT22 Temp Ressenti : svalue = "); Serial.print(svalue2); Serial.print(" (TEMP)");
-      SendData("udevice", idxTempRessenti, 0, svalue2);
-    } 
+    // Les valeurs ne sont pas de données, on sort de la boucle
+    return;
   }
+
+  // On établi le degré de confort
+  int hum_status = 0;
+  if ((hum >= 45) and (hum <= 70))      { hum_status = 1; } // confortable
+  else if ((hum >= 30) and (hum < 45))  { hum_status = 0; } // Normal
+  else if (hum < 30)                    { hum_status = 2; } // sec
+  else if (hum > 70)                    { hum_status = 3; } // humide
+
+  if ( idxDHT22 != 0) {
+    String svalue =  String(temp,1) + ";" + String(hum,0) + ";" + String(hum_status);
+    Serial.print("DHT22 : svalue = "); Serial.print(svalue); Serial.print(" (TEMP;HUM;HUM_STAT)");
+    SendData("udevice", idxDHT22, 0, svalue);
+  }
+
+  if ( idxTempRessenti != 0) {
+    String svalue2 = String(dht.computeHeatIndex(temp, hum, false),1);   // Calcul de l'indice de chaleur en Celsius - Température ressenti (isFahreheit = false)
+    Serial.print("DHT22 Temp Ressenti : svalue = "); Serial.print(svalue2); Serial.print(" (TEMP)");
+    SendData("udevice", idxTempRessenti, 0, svalue2);
+  } 
 }
 
 
